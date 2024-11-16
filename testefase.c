@@ -6,6 +6,7 @@
 
 #define WIDTH 20
 #define HEIGHT 20
+#define TOTAL_PHASES 2  // Quantidade de fases no jogo
 
 // Função para desenhar o campo de jogo
 void drawMap(char map[HEIGHT][WIDTH]) {
@@ -33,7 +34,7 @@ void drawMap(char map[HEIGHT][WIDTH]) {
 }
 
 // Função para configurar o mapa da fase
-void setupMap(char map[HEIGHT][WIDTH]) {
+void setupMap(char map[HEIGHT][WIDTH], int phase) {
     int i, j;
 
     // Limpa o mapa
@@ -53,17 +54,26 @@ void setupMap(char map[HEIGHT][WIDTH]) {
         map[HEIGHT - 1][j] = '|';
     }
 
-    // Adiciona paredes internas (desafio simples)
-    map[5][5] = '|';
-    map[6][5] = '|';
-    map[7][5] = '|';
-    map[8][5] = '|';
-
-    // Adiciona o item-chave
-    map[3][3] = 'K';
-
-    // Define a meta
-    map[HEIGHT - 2][WIDTH - 2] = 'M';
+    // Configuração específica por fase
+    if (phase == 1) {
+        // Fase 1
+        map[5][5] = '|';
+        map[6][5] = '|';
+        map[7][5] = '|';
+        map[8][5] = '|';
+        map[3][3] = 'K';  // Chave
+        map[HEIGHT - 2][WIDTH - 2] = 'M';  // Meta
+    } else if (phase == 2) {
+        // Fase 2 (mais desafiadora)
+        map[5][5] = '|';
+        map[5][6] = '|';
+        map[5][7] = '|';
+        map[6][7] = '|';
+        map[7][7] = '|';
+        map[8][3] = '|';
+        map[4][4] = 'K';  // Chave
+        map[1][WIDTH - 2] = 'M';  // Meta no topo direito
+    }
 }
 
 // Função principal
@@ -74,10 +84,11 @@ int main() {
     int playerX = 1, playerY = 1;  // Posição inicial do jogador
     char input;
     int hasKey = 0;  // Jogador começa sem a chave
+    int currentPhase = 1;  // Começa na fase 1
     int gameOver = 0;
 
     // Configura o mapa inicial
-    setupMap(map);
+    setupMap(map, currentPhase);
     map[playerY][playerX] = 'P';  // Posiciona o jogador no mapa
 
     // Desenha o campo inicial
@@ -103,13 +114,28 @@ int main() {
                         printf("Você pegou a chave!\n");
                         usleep(500000);  // Pausa de 500ms
                     }
-                    
+
                     // Verifica se é a meta antes de mover
                     if (map[newY][newX] == 'M') {
                         if (hasKey) {
-                            printf("Parabéns! Você completou o jogo!\n");
-                            gameOver = 1;  // Encerra o jogo
-                            break;
+                            printf("Parabéns! Você completou a fase %d!\n", currentPhase);
+                            usleep(1000000);  // Pausa de 1 segundo
+
+                            // Avança para a próxima fase
+                            currentPhase++;
+                            if (currentPhase > TOTAL_PHASES) {
+                                printf("Você completou todas as fases! Parabéns!\n");
+                                gameOver = 1;  // Encerra o jogo
+                            } else {
+                                // Configura o mapa da próxima fase
+                                setupMap(map, currentPhase);
+                                playerX = 1;
+                                playerY = 1;  // Redefine a posição inicial do jogador
+                                hasKey = 0;  // Reseta a chave
+                                map[playerY][playerX] = 'P';  // Posiciona o jogador
+                                drawMap(map);  // Desenha o novo mapa
+                            }
+                            continue;  // Evita redesenhar a fase anterior
                         } else {
                             printf("Você precisa pegar a chave primeiro!\n");
                             usleep(1000000);  // Pausa de 1 segundo
