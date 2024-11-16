@@ -22,9 +22,9 @@ void drawMap(char map[HEIGHT][WIDTH]) {
             } else if (map[i][j] == 'K') {
                 printf("\033[36mK\033[0m ");  // Chave em azul claro
             } else if (map[i][j] == 'M') {
-                printf("\033[33mM\033[0m ");  // Meta em amarelo
+                printf("\033[41m  \033[0m");  // Meta representada como um quadrado vermelho
             } else if (map[i][j] == 'X') {
-                printf("\033[34mX\033[0m ");  // Trajeto já percorrido em azul escuro
+                printf("\033[44m  \033[0m");  // Trajeto já percorrido como um quadrado azul
             } else {
                 printf("\033[48;5;153m. \033[0m");  // Fundo azul bebê
             }
@@ -79,6 +79,7 @@ void setupMap(char map[HEIGHT][WIDTH], int phase) {
 // Função principal
 int main() {
     setlocale(LC_ALL, "Portuguese");
+    setlocale(LC_ALL, "");  // Ativa suporte UTF-8
 
     char map[HEIGHT][WIDTH];
     int playerX = 1, playerY = 1;  // Posição inicial do jogador
@@ -115,6 +116,14 @@ int main() {
                         usleep(500000);  // Pausa de 500ms
                     }
 
+                    // Se pisar no X (quadrado azul), morre
+                    if (map[newY][newX] == 'X') {
+                        printf("Você pisou em um caminho perigoso (X) e morreu!\n");
+                        usleep(1000000);  // Pausa de 1 segundo
+                        gameOver = 1;  // Encerra o jogo
+                        continue;
+                    }
+
                     // Verifica se é a meta antes de mover
                     if (map[newY][newX] == 'M') {
                         if (hasKey) {
@@ -144,7 +153,7 @@ int main() {
                     }
 
                     // Atualiza posição do jogador
-                    map[playerY][playerX] = 'X';  // Marca o caminho percorrido
+                    map[playerY][playerX] = 'X';  // Marca o caminho percorrido (quadrado azul)
                     playerX = newX;
                     playerY = newY;
                     map[playerY][playerX] = 'P';  // Atualiza posição do jogador
