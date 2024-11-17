@@ -33,11 +33,11 @@ void drawMap(Map *map) {
     for (i = 0; i < HEIGHT; i++) {
         for (j = 0; j < WIDTH; j++) {
             if (map->grid[i][j] == 'P') {
-                printf("\033[31mP\033[0m ");  // Jogador em vermelho
+                printf("\033[42m  \033[0m");  // Jogador como quadrado verde
             } else if (map->grid[i][j] == '|') {
-                printf("\033[32m|\033[0m ");  // Parede em verde
+                printf("\033[48;5;69m  \033[0m");  // Parede como quadrado azul gelo escuro
             } else if (map->grid[i][j] == 'K') {
-                printf("\033[36mK\033[0m ");  // Chave em azul claro
+                printf("\033[33mK\033[0m ");  // Chave em amarelo
             } else if (map->grid[i][j] == 'M') {
                 printf("\033[41m  \033[0m");  // Meta representada como um quadrado vermelho
             } else if (map->grid[i][j] == 'X') {
@@ -134,7 +134,7 @@ int main() {
             if (newX >= 0 && newX < WIDTH && newY >= 0 && newY < HEIGHT) {
                 if (map.grid[newY][newX] != '|') {  // Não pode atravessar paredes
                     if (map.grid[newY][newX] == 'X') {
-                        printf("Você pisou na água!VOCÊ MORREU!\n");
+                        printf("Você pisou em um quadrado azul e perdeu!\n");
                         game.gameOver = 1;
                         usleep(1000000);
                         continue;
