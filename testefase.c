@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <locale.h>
 #include <unistd.h>  // Para usleep()
-#include <conio.h>  // Para _kbhit() e _getch()
+#include <conio.h>   // Para _kbhit() e _getch()
 
 #define WIDTH 20
 #define HEIGHT 20
@@ -29,9 +29,9 @@ typedef struct {
 // Função para desenhar o campo de jogo
 void drawMap(Map *map) {
     system("cls");  // Limpa a tela no Windows
-    int i,j;
-    for ( i = 0; i < HEIGHT; i++) {
-        for ( j = 0; j < WIDTH; j++) {
+    int i, j;  // Variáveis declaradas fora do for
+    for (i = 0; i < HEIGHT; i++) {
+        for (j = 0; j < WIDTH; j++) {
             if (map->grid[i][j] == 'P') {
                 printf("\033[31mP\033[0m ");  // Jogador em vermelho
             } else if (map->grid[i][j] == '|') {
@@ -71,20 +71,20 @@ void showStats(Game *game, Player *player) {
 
 // Função para configurar o mapa da fase
 void setupMap(Map *map, int phase) {
+    int i, j;  // Variáveis declaradas fora do for
     // Limpa o mapa
-    int i,j;
-    for ( i = 0; i < HEIGHT; i++) {
-        for ( j = 0; j < WIDTH; j++) {
+    for (i = 0; i < HEIGHT; i++) {
+        for (j = 0; j < WIDTH; j++) {
             map->grid[i][j] = '.';  // Espaço vazio
         }
     }
 
     // Adiciona paredes nas bordas
-    for ( i = 0; i < HEIGHT; i++) {
+    for (i = 0; i < HEIGHT; i++) {
         map->grid[i][0] = '|';
         map->grid[i][WIDTH - 1] = '|';
     }
-    for ( j = 0; j < WIDTH; j++) {
+    for (j = 0; j < WIDTH; j++) {
         map->grid[0][j] = '|';
         map->grid[HEIGHT - 1][j] = '|';
     }
@@ -133,6 +133,13 @@ int main() {
             // Verifica se a nova posição é válida
             if (newX >= 0 && newX < WIDTH && newY >= 0 && newY < HEIGHT) {
                 if (map.grid[newY][newX] != '|') {  // Não pode atravessar paredes
+                    if (map.grid[newY][newX] == 'X') {
+                        printf("Você pisou na água!VOCÊ MORREU!\n");
+                        game.gameOver = 1;
+                        usleep(1000000);
+                        continue;
+                    }
+
                     if (map.grid[newY][newX] == 'K') {
                         player.hasKey = 1;  // Pega a chave
                         printf("Você pegou a chave!\n");
