@@ -91,7 +91,48 @@ void setupMap(Map *map, int phase) {
 
     // Configuração específica por fase
     if (phase == 1) {
-        map->grid[5][5] = '|';
+        //coluna x linha
+       map->grid[2][2] = '|';
+       map->grid[2][3] = '|';
+       map->grid[2][4] = '|';
+       map->grid[2][5] = '|';
+       map->grid[2][7] = '|';
+       map->grid[2][8] = '|';
+       map->grid[2][10] = '|';
+       map->grid[2][12] = '|';
+       map->grid[2][13] = '|';
+       map->grid[2][16] = '|';
+       map->grid[2][18] = '|';
+
+       map->grid[3][2]     = '|';
+       map->grid[3][5]     = '|';
+       map->grid[3][14] = '|';
+       map->grid[3][16] = '|';
+
+       map->grid[4][2]     = '|';
+
+       map->grid[5][2]     = '|';
+
+       map->grid[6][2]     = '|';
+
+       map->grid[7][2]     = '|';
+       map->grid[7][3]     = '|';
+       map->grid[7][4]     = '|';
+       map->grid[7][5]     = '|';
+
+
+
+       map->grid[16][11] = '|';
+       map->grid[16][12] = '|';
+       map->grid[16][13] = '|';
+       map->grid[16][14] = '|';
+       map->grid[16][15] = '|';
+
+       map->grid[17][15] = '|';
+       map->grid[17][16] = '|';
+       map->grid[17][17] = '|';
+       map->grid[17][18] = '|';
+
         map->grid[3][3] = 'K';  // Chave
         map->grid[HEIGHT - 2][WIDTH - 2] = 'M';  // Meta
     } else if (phase == 2) {
