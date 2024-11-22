@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <locale.h>
-#include <unistd.h>  // Para usleep()
-#include <conio.h>   // Para _kbhit() e _getch()
+#include <unistd.h>  // Para usleep() -> pausar a execução por um período de tempo especificado (em microssegundos).
+#include <conio.h>   // Para _kbhit()-> para verificar se uma tecla foi pressionada  e  _getch() ->para obter uma entrada de caractere sem esperar pela tecla Enter
 
 #define LARGURA 20
 #define ALTURA 20
-#define TOTAL_PHASES 2  // Quantidade de fases no jogo
+#define TOTAL_DE_FASES 2  // Quantidade de fases no jogo
 
 // Struct para representar o jogador
 typedef struct {
@@ -33,15 +33,15 @@ void drawMap(Map *map) {
     for (i = 0; i < ALTURA; i++) {
         for (j = 0; j < LARGURA; j++) {
             if (map->grid[i][j] == 'P') {
-                printf("\033[42m  \033[0m");  // Jogador como quadrado verde
+                printf("\033[41m  \033[0m");  // Jogador como quadrado vermelho
             } else if (map->grid[i][j] == '|') {
                 printf("\033[48;5;69m  \033[0m");  // Parede como quadrado azul gelo escuro
             } else if (map->grid[i][j] == 'K') {
                 printf("\033[33mK\033[0m ");  // Chave em amarelo
             } else if (map->grid[i][j] == 'M') {
-                printf("\033[41m  \033[0m");  // Meta representada como um quadrado vermelho
+                printf("\033[42m  \033[0m");  // Meta representada como um quadrado verde
             } else if (map->grid[i][j] == 'X') {
-                printf("\033[44m  \033[0m");  // Trajeto já¡ percorrido como um quadrado azul
+                printf("\033[44m  \033[0m");  // Trajeto já percorrido como um quadrado azul
             } else {
                 printf("\033[48;5;153m. \033[0m");  // Fundo azul bebê
             }
@@ -53,12 +53,12 @@ void drawMap(Map *map) {
 // Função para exibir estatí­sticas
 void showStats(Game *game, Player *player) {
     printf("\n=== Estatísticas ===\n");
-    printf("Fase Atual: %d/%d\n", game->FaseAtual, TOTAL_PHASES);
+    printf("Fase Atual: %d/%d\n", game->FaseAtual, TOTAL_DE_FASES);
     printf("Chave: %s\n", player->hasKey ? "Sim" : "Não");
     printf("Movimentos Realizados: %d\n", player->moves);
     printf("Posição do Jogador: (%d, %d)\n", player->x, player->y);
     if (game->gameOver) {
-        if (game->FaseAtual > TOTAL_PHASES) {
+        if (game->FaseAtual > TOTAL_DE_FASES) {
             printf("Estado: Jogo Concluído! Parabéns!\n");
         } else {
             printf("Estado: Você perdeu!\n");
@@ -71,7 +71,7 @@ void showStats(Game *game, Player *player) {
 
 // Função para configurar o mapa da fase
 void setupMap(Map *map, int phase) {
-    int i, j;  // Variáveis declaradas fora do for
+    int i, j; 
     // Limpa o mapa
     for (i = 0; i < ALTURA; i++) {
         for (j = 0; j < LARGURA; j++) {
@@ -163,14 +163,14 @@ void setupMap(Map *map, int phase) {
        map->grid[17][18] = '|';
 
         map->grid[3][3] = 'K';  // Chave
-        map->grid[ALTURA - 2][LARGURA - 2] = 'M';  // Meta
+        map->grid[ALTURA - 2][LARGURA - 2] = 'M';  // Meta final 
     } else if (phase == 2) {
         map->grid[5][5] = '|';
         map->grid[6][5] = '|';
         map->grid[7][5] = '|';
         map->grid[8][3] = '|';
         map->grid[4][4] = 'K';  // Chave
-        map->grid[1][LARGURA - 2] = 'M';  // Meta
+        map->grid[1][LARGURA - 2] = 'M';  // Meta final
     }
 }
 
@@ -220,7 +220,7 @@ int main() {
                             printf("Fase %d completa!\n", game.FaseAtual);
                             usleep(1000000);
                             game.FaseAtual++;
-                            if (game.FaseAtual > TOTAL_PHASES) {
+                            if (game.FaseAtual > TOTAL_DE_FASES) {
                                 game.gameOver = 1;
                             } else {
                                 setupMap(&map, game.FaseAtual);
