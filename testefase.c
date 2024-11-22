@@ -10,7 +10,7 @@
 
 // Struct para representar o jogador
 typedef struct {
-    int x, y;      // PosiÃ§Ã£o do jogador
+    int x, y;      // Posição do jogador
     int hasKey;    // Se o jogador possui a chave
     int moves;     // Contador de movimentos
 } Player;
@@ -26,10 +26,10 @@ typedef struct {
     char grid[HEIGHT][WIDTH];  // Matriz que define o mapa
 } Map;
 
-// FunÃ§Ã£o para desenhar o campo de jogo
+// Função para desenhar o campo de jogo
 void drawMap(Map *map) {
     system("cls");  // Limpa a tela no Windows
-    int i, j;  // VariÃ¡veis declaradas fora do for
+    int i, j;  // Variáveis declaradas fora do for
     for (i = 0; i < HEIGHT; i++) {
         for (j = 0; j < WIDTH; j++) {
             if (map->grid[i][j] == 'P') {
@@ -41,27 +41,27 @@ void drawMap(Map *map) {
             } else if (map->grid[i][j] == 'M') {
                 printf("\033[41m  \033[0m");  // Meta representada como um quadrado vermelho
             } else if (map->grid[i][j] == 'X') {
-                printf("\033[44m  \033[0m");  // Trajeto jÃ¡ percorrido como um quadrado azul
+                printf("\033[44m  \033[0m");  // Trajeto já¡ percorrido como um quadrado azul
             } else {
-                printf("\033[48;5;153m. \033[0m");  // Fundo azul bebÃª
+                printf("\033[48;5;153m. \033[0m");  // Fundo azul bebê
             }
         }
         printf("\n");
     }
 }
 
-// FunÃ§Ã£o para exibir estatÃ­sticas
+// Função para exibir estatí­sticas
 void showStats(Game *game, Player *player) {
-    printf("\n=== EstatÃ­sticas ===\n");
+    printf("\n=== Estatísticas ===\n");
     printf("Fase Atual: %d/%d\n", game->currentPhase, TOTAL_PHASES);
-    printf("Chave: %s\n", player->hasKey ? "Sim" : "NÃ£o");
+    printf("Chave: %s\n", player->hasKey ? "Sim" : "Não");
     printf("Movimentos Realizados: %d\n", player->moves);
-    printf("PosiÃ§Ã£o do Jogador: (%d, %d)\n", player->x, player->y);
+    printf("Posição do Jogador: (%d, %d)\n", player->x, player->y);
     if (game->gameOver) {
         if (game->currentPhase > TOTAL_PHASES) {
-            printf("Estado: Jogo ConcluÃ­do! ParabÃ©ns!\n");
+            printf("Estado: Jogo Concluído! Parabéns!\n");
         } else {
-            printf("Estado: VocÃª perdeu!\n");
+            printf("Estado: Você perdeu!\n");
         }
     } else {
         printf("Estado: Jogando...\n");
@@ -69,13 +69,13 @@ void showStats(Game *game, Player *player) {
     printf("=====================\n");
 }
 
-// FunÃ§Ã£o para configurar o mapa da fase
+// Função para configurar o mapa da fase
 void setupMap(Map *map, int phase) {
-    int i, j;  // VariÃ¡veis declaradas fora do for
+    int i, j;  // Variáveis declaradas fora do for
     // Limpa o mapa
     for (i = 0; i < HEIGHT; i++) {
         for (j = 0; j < WIDTH; j++) {
-            map->grid[i][j] = '.';  // EspaÃ§o vazio
+            map->grid[i][j] = '.';  // Espaço vazio
         }
     }
 
@@ -89,7 +89,7 @@ void setupMap(Map *map, int phase) {
         map->grid[HEIGHT - 1][j] = '|';
     }
 
-    // ConfiguraÃ§Ã£o especÃ­fica por fase
+    // Configuração específica por fase
     if (phase == 1) {
         //coluna x linha
        map->grid[2][2] = '|';
@@ -174,7 +174,7 @@ void setupMap(Map *map, int phase) {
     }
 }
 
-// FunÃ§Ã£o principal
+// Função principal
 int main() {
     setlocale(LC_ALL, "");
 
@@ -200,11 +200,11 @@ int main() {
             if (input == 'a') newX--;  // Para esquerda
             if (input == 'd') newX++;  // Para direita
 
-            // Verifica se a nova posiÃ§Ã£o Ã© vÃ¡lida
+            // Verifica se a nova posição é válida
             if (newX >= 0 && newX < WIDTH && newY >= 0 && newY < HEIGHT) {
-                if (map.grid[newY][newX] != '|') {  // NÃ£o pode atravessar paredes
+                if (map.grid[newY][newX] != '|') {  // Não pode atravessar paredes
                     if (map.grid[newY][newX] == 'X') {
-                        printf("VocÃª pisou em um quadrado azul e perdeu!\n");
+                        printf("Você pisou em um quadrado azul e perdeu!\n");
                         game.gameOver = 1;
                         usleep(1000000);
                         continue;
