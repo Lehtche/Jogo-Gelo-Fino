@@ -37,7 +37,7 @@ void drawMap(Map *map) {
             } else if (map->grid[i][j] == '|') {
                 printf("\033[48;5;69m  \033[0m");  // Parede como quadrado azul gelo escuro
             } else if (map->grid[i][j] == 'K') {
-                printf("\033[33mK\033[0m ");  // Chave em amarelo
+                printf("\033[43;37mK\033[0m");  // Chave em amarelo
             } else if (map->grid[i][j] == 'M') {
                 printf("\033[42m  \033[0m");  // Meta representada como um quadrado verde
             } else if (map->grid[i][j] == 'X') {
