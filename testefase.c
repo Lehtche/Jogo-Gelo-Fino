@@ -1,35 +1,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <locale.h>
-#include <unistd.h>
-#include <conio.h>
+#include <unistd.h>  // Para usleep() -> pausar a execução por um período de tempo especificado (em microssegundos).
+#include <conio.h>   // Para _kbhit()-> para verificar se uma tecla foi pressionada  e  _getch() ->para obter uma entrada de caractere sem esperar pela tecla Enter
 
 #define LARGURA 20
 #define ALTURA 20
-#define TOTAL_DE_FASES 5
+#define TOTAL_DE_FASES 5 // Quantidade de fases no jogo
 
+// Struct para representar o jogador
 typedef struct {
-    int x, y;        // Posição do jogador
-    int hasKey;      // Se o jogador possui a chave
-    int moves;       // Contador de movimentos
+    int x, y;      // Posição do jogador
+    int hasKey;    // Se o jogador possui a chave
+    int moves;     // Contador de movimentos
 } Player;
 
+// Struct para representar o jogo
 typedef struct {
-    int FaseAtual;      // Fase atual do jogo
-    int gameOver;       // Indica se o jogo terminou
-    int totalGames;     // Total de jogos realizados
-    int totalMoves;     // Total de movimentos realizados em todas as partidas
-    int phasesCompleted; // Total de fases concluídas em todas as partidas
+    int FaseAtual;  // Fase atual do jogo
+    int gameOver;      // Indica se o jogo terminou
 } Game;
 
+// Struct para representar o mapa
 typedef struct {
     char grid[ALTURA][LARGURA];  // Matriz que define o mapa
 } Map;
 
 // Função para desenhar o campo de jogo
 void drawMap(Map *map) {
-    system("cls");  // Limpa a tela
-    int i, j;       // Variáveis declaradas fora do laço for
+    system("cls");  // Limpa a tela no Windows
+    int i, j;  // Variáveis declaradas fora do for
     for (i = 0; i < ALTURA; i++) {
         for (j = 0; j < LARGURA; j++) {
             if (map->grid[i][j] == 'P') {
@@ -50,9 +50,25 @@ void drawMap(Map *map) {
     }
 }
 
+// Função para exibir estatí­sticas
+void showStats(Game *game, Player *player) {
+    printf("Fase Atual: %d/%d\n", game->FaseAtual, TOTAL_DE_FASES);
+    printf("Pontuação por movimento: %d pts\n", player->moves);
+    printf("Posição do Jogador: (%d, %d)\n", player->x, player->y);
+    if (game->gameOver) {
+        if (game->FaseAtual > TOTAL_DE_FASES) {
+            printf("Estado: Jogo Concluído! Parabéns!\n");
+        } else {
+            printf("Estado: Você perdeu!\n");
+        }
+    } else {
+        printf("Estado: Jogando...\n");
+    }
+}
+
 // Função para configurar o mapa da fase
 void setupMap(Map *map, int phase) {
-    int i, j;  // Variáveis declaradas fora do laço for
+    int i, j; 
     // Limpa o mapa
     for (i = 0; i < ALTURA; i++) {
         for (j = 0; j < LARGURA; j++) {
@@ -70,134 +86,209 @@ void setupMap(Map *map, int phase) {
         map->grid[ALTURA - 1][j] = '|';
     }
 
-    // Configuração específica por fase
+// Configuração específica por fase
     if (phase == 1) {
-        map->grid[4][4] = 'K';                   // Chave
-        map->grid[1][LARGURA - 2] = 'M';         // Meta final
+        //coluna x linha
+       map->grid[4][4] = 'K';  // Chave
+        map->grid[1][LARGURA - 2] = 'M';  // Meta final
     } else if (phase == 2) {
-        map->grid[4][4] = 'K';                   // Chave
-        map->grid[ALTURA - 2][LARGURA - 2] = 'M';// Meta final
-        map->grid[5][5] = '|';                   // Obstáculos
+        map->grid[5][5] = '|';
         map->grid[6][5] = '|';
+        map->grid[7][5] = '|';
+        map->grid[8][3] = '|';
+        map->grid[4][4] = 'K';  // Chave
+        map->grid[ALTURA - 2][LARGURA - 2] = 'M';  // Meta final 
+    }else if (phase == 3) {
+        map->grid[4][4] = '|';
+        map->grid[4][5] = '|';
+        map->grid[5][5] = '|';
+        map->grid[6][5] = '|';
+        map->grid[7][3] = '|';
+        map->grid[7][4] = '|';
+        map->grid[7][5] = '|';
+        map->grid[3][2] = '|';
+        map->grid[3][5]  = '|';
+        map->grid[3][14] = '|';
+        map->grid[3][16] = '|';
+        map->grid[4][2] = '|';
+        map->grid[4][5] = '|';
+        map->grid[5][2] = '|';
+        map->grid[8][4] = 'K';  // Chave
+        map->grid[ALTURA - 3][LARGURA - 3] = 'M';  // Meta final 
     }
-    // Adicione mais fases conforme necessário...
-}
+    else if (phase == 4){
+ 		map->grid[4][8] = '|';
+        map->grid[3][5] = '|';
+        map->grid[5][5] = '|';
+        map->grid[6][5] = '|';
+        map->grid[7][3] = '|';
+        map->grid[8][4] = '|';
+        map->grid[7][5] = '|';
+    	map->grid[5][2] = '|';
+        map->grid[3][5] = '|';
+        map->grid[3][14] = '|';
+        map->grid[3][16] = '|';
+        map->grid[4][4] = '|';
+  		map->grid[4][5] = '|';
+        map->grid[5][2] = '|';
+        map->grid[4][4] = '|';
+ 	    map->grid[4][5] = '|';
+        map->grid[5][2] = '|';
+        map->grid[3][4] = 'K';  // Chave
+        map->grid[ALTURA - 4][LARGURA - 4] = 'M';  // Meta final
+    }
+    else if (phase == 5) {
+        map->grid[2][2] = '|';
+       map->grid[2][3] = '|';
+       map->grid[2][4] = '|';
+       map->grid[2][5] = '|';
+       map->grid[2][7] = '|';
+       map->grid[2][8] = '|';
+       map->grid[2][10] = '|';
+       map->grid[2][12] = '|';
+       map->grid[2][13] = '|';
+       map->grid[2][16] = '|';
+       map->grid[2][18] = '|';
 
-// Função para exibir o menu principal
-int showMenu() {
-    int choice;
-    do {
-        system("cls");
-        printf("=== MENU PRINCIPAL ===\n");
-        printf("1. Jogar\n");
-        printf("2. Estatísticas\n");
-        printf("3. Sair\n");
-        printf("Escolha uma opção: ");
-        scanf("%d", &choice);
-    } while (choice < 1 || choice > 3);
-    return choice;
-}
+       map->grid[3][2]     = '|';
+       map->grid[3][5]     = '|';
+       map->grid[3][14] = '|';
+       map->grid[3][16] = '|';
 
-// Função para exibir estatísticas
-void showStatistics(Game *game) {
-    system("cls");
-    printf("=== ESTATÍSTICAS ===\n");
-    printf("Total de jogos: %d\n", game->totalGames);
-    printf("Total de movimentos: %d\n", game->totalMoves);
-    printf("Fases concluídas: %d\n", game->phasesCompleted);
-    printf("\nPressione qualquer tecla para voltar ao menu...");
-    getch();
+       map->grid[4][2] = '|';
+	   map->grid[4][5] = '|';
+       map->grid[5][2] = '|';
+
+       map->grid[6][2] = '|';
+       map->grid[7][2] = '|';
+       map->grid[7][3] = '|';
+       map->grid[7][4] = '|';
+       map->grid[7][5] = '|';
+	   map->grid[7][6] = '|';	
+	   map->grid[7][7] = '|';	
+	   map->grid[7][8] = '|';
+	   
+	   map->grid[8][2]     = '|';
+	   map->grid[8][3]     = '|';
+	   map->grid[8][9]     = '|';	
+	   map->grid[8][14]     = '|';
+	   map->grid[8][17]     = '|';
+	   map->grid[8][18]     = '|';
+
+	   map->grid[8][5] = '|';
+	   
+	   map->grid[5][9] = '|';
+	   map->grid[7][9] = '|';
+	   
+	   map->grid[10][2] = '|';
+	   map->grid[10][9] = '|';
+	   map->grid[10][12] = '|';
+	
+	   map->grid[12][5] = '|';
+	   map->grid[14][12] = '|';
+	   map->grid[14][16] = '|';
+	   map->grid[14][5] = '|';
+	   map->grid[15][5] = '|';
+	   
+	   
+	   map->grid[16][5] = '|';
+       map->grid[16][18] = '|';
+       map->grid[16][10] = '|';
+       map->grid[16][11] = '|';
+       map->grid[16][12] = '|';
+       map->grid[16][13] = '|';
+       map->grid[16][14] = '|';
+       map->grid[16][15] = '|';
+
+       map->grid[17][5] = '|';
+       map->grid[17][9] = '|';
+       map->grid[17][12] = '|';
+       map->grid[17][16] = '|';
+       map->grid[17][17] = '|';
+       map->grid[17][18] = '|';
+
+    map->grid[3][3] = 'K';  // Chave
+    map->grid[ALTURA - 2][LARGURA - 2] = 'M';  // Meta final 
+    }
 }
 
 // Função principal
 int main() {
     setlocale(LC_ALL, "");
 
-    Game game = {1, 0, 0, 0, 0};   // Inicializa o jogo
+    Player player = {1, 1, 0, 0};   // Inicializa o jogador
+    Game game = {1, 0};              // Inicializa o jogo
+    Map map;                         // Inicializa o mapa
 
-    while (1) {
-        int choice = showMenu();
+    setupMap(&map, game.FaseAtual);
+    map.grid[player.y][player.x] = 'P';  // Posiciona o jogador no mapa
 
-        if (choice == 1) {
-            // Jogar
-            Player player = {1, 1, 0, 0};   // Inicializa o jogador
-            Map map;                       // Inicializa o mapa
+    drawMap(&map);
+    showStats(&game, &player);
 
-            game.FaseAtual = 1;
-            game.gameOver = 0;
+    while (!game.gameOver) {
+        if (_kbhit()) {
+            char input = _getch();  // Captura a tecla pressionada
+            int newX = player.x;
+            int newY = player.y;
 
-            setupMap(&map, game.FaseAtual);
-            map.grid[player.y][player.x] = 'P';
+            // Movimenta o jogador com base na tecla pressionada
+            if (input == 'w') newY--;  // Para cima
+            if (input == 's') newY++;  // Para baixo
+            if (input == 'a') newX--;  // Para esquerda
+            if (input == 'd') newX++;  // Para direita
 
-            drawMap(&map);
+            // Verifica se a nova posição é válida
+            if (newX >= 0 && newX < LARGURA && newY >= 0 && newY < ALTURA) {
+                if (map.grid[newY][newX] != '|') {  // Não pode atravessar paredes
+                    if (map.grid[newY][newX] == 'X') {
+                        printf("Você pisou em um quadrado azul e perdeu!\n");
+                        game.gameOver = 1;
+                        usleep(1000000);
+                        continue;
+                    }
 
-            while (!game.gameOver) {
-                if (_kbhit()) {
-                    char input = _getch();  // Captura a tecla pressionada
-                    int newX = player.x;
-                    int newY = player.y;
+                    if (map.grid[newY][newX] == 'K') {
+                        player.hasKey = 1;  // Pega a chave
+                        printf("Você pegou a chave!\n");
+                        usleep(500000);
+                    }
 
-                    if (input == 'w') newY--;
-                    if (input == 's') newY++;
-                    if (input == 'a') newX--;
-                    if (input == 'd') newX++;
-
-                    if (newX >= 0 && newX < LARGURA && newY >= 0 && newY < ALTURA) {
-                        if (map.grid[newY][newX] != '|') {
-                            if (map.grid[newY][newX] == 'K') {
-                                player.hasKey = 1;
+                    // Verifica se o jogador alcançou a meta
+                    if (map.grid[newY][newX] == 'M') {
+                        if (player.hasKey) {
+                            printf("Fase %d completa!\n", game.FaseAtual);
+                            usleep(1000000);
+                            game.FaseAtual++;
+                            if (game.FaseAtual > TOTAL_DE_FASES) {
+                                game.gameOver = 1;  // Jogo terminado
+                            } else {
+                                setupMap(&map, game.FaseAtual);
+                                player.x = player.y = 1;  // Reseta a posição
+                                player.hasKey = 0;        // Reseta a chave
+                                // **NOTA: Não resetamos a pontuação (player.moves)**
                             }
-                            if (map.grid[newY][newX] == 'M') {
-                                if (player.hasKey) {
-                                    printf("Fase %d completa!\n", game.FaseAtual);
-                                    usleep(1000000);
-                                    game.FaseAtual++;
-                                    game.phasesCompleted++;
-                                    if (game.FaseAtual > TOTAL_DE_FASES) {
-                                        game.gameOver = 1;
-                                    } else {
-                                        setupMap(&map, game.FaseAtual);
-                                        player.x = player.y = 1;
-                                        player.hasKey = 0;
-                                        player.moves = 0;
-                                    }
-                                } else {
-                                    printf("Pegue a chave primeiro!\n");
-                                    usleep(500000);
-                                    continue;
-                                }
-                            }
-                            map.grid[player.y][player.x] = 'X';
-                            player.x = newX;
-                            player.y = newY;
-                            map.grid[player.y][player.x] = 'P';
-                            player.moves++;
+                        } else {
+                            printf("Você precisa pegar a chave para passar de fase!\n");
+                            usleep(500000);
+                            continue;  // Não avança para a próxima fase
                         }
                     }
 
-                    drawMap(&map);
+                    map.grid[player.y][player.x] = 'X';  // Marca o caminho percorrido
+                    player.x = newX;
+                    player.y = newY;
+                    map.grid[player.y][player.x] = 'P';
+                    player.moves++;  // Aumenta a pontuação com cada movimento
                 }
-                usleep(100000);
             }
 
-            game.totalGames++;
-            game.totalMoves += player.moves;
-
-            printf("\nJogo terminado!\n");
-            printf("Deseja jogar novamente? (s/n): ");
-            char playAgain;
-            scanf(" %c", &playAgain);
-            if (playAgain != 's') break;
-
-        } else if (choice == 2) {
-            // Estatísticas
-            showStatistics(&game);
-        } else {
-            // Sair
-            printf("Saindo do jogo...\n");
-            break;
+            drawMap(&map);
+            showStats(&game, &player);
         }
+        usleep(100000);
     }
 
     return 0;
 }
+
