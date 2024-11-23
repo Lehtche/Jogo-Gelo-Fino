@@ -6,7 +6,7 @@
 
 #define LARGURA 20
 #define ALTURA 20
-#define TOTAL_DE_FASES 2  // Quantidade de fases no jogo
+#define TOTAL_DE_FASES 5 // Quantidade de fases no jogo
 
 // Struct para representar o jogador
 typedef struct {
@@ -37,7 +37,7 @@ void drawMap(Map *map) {
             } else if (map->grid[i][j] == '|') {
                 printf("\033[48;5;69m  \033[0m");  // Parede como quadrado azul gelo escuro
             } else if (map->grid[i][j] == 'K') {
-                printf("\033[43;37mK\033[0m");  // Chave em amarelo
+                printf("\033[33mK\033[0m ");  // Chave em amarelo
             } else if (map->grid[i][j] == 'M') {
                 printf("\033[42m  \033[0m");  // Meta representada como um quadrado verde
             } else if (map->grid[i][j] == 'X') {
@@ -89,10 +89,59 @@ void setupMap(Map *map, int phase) {
         map->grid[ALTURA - 1][j] = '|';
     }
 
-    // Configuração específica por fase
+// Configuração específica por fase
     if (phase == 1) {
         //coluna x linha
-       map->grid[2][2] = '|';
+       map->grid[4][4] = 'K';  // Chave
+        map->grid[1][LARGURA - 2] = 'M';  // Meta final
+    } else if (phase == 2) {
+        map->grid[5][5] = '|';
+        map->grid[6][5] = '|';
+        map->grid[7][5] = '|';
+        map->grid[8][3] = '|';
+        map->grid[4][4] = 'K';  // Chave
+        map->grid[ALTURA - 2][LARGURA - 2] = 'M';  // Meta final 
+    }else if (phase == 3) {
+        map->grid[4][4] = '|';
+        map->grid[4][5] = '|';
+        map->grid[5][5] = '|';
+        map->grid[6][5] = '|';
+        map->grid[7][3] = '|';
+        map->grid[7][4] = '|';
+        map->grid[7][5] = '|';
+        map->grid[3][2] = '|';
+        map->grid[3][5]  = '|';
+        map->grid[3][14] = '|';
+        map->grid[3][16] = '|';
+        map->grid[4][2] = '|';
+        map->grid[4][5] = '|';
+        map->grid[5][2] = '|';
+        map->grid[8][4] = 'K';  // Chave
+        map->grid[ALTURA - 3][LARGURA - 3] = 'M';  // Meta final 
+    }
+    else if (phase == 4){
+ 		map->grid[4][8] = '|';
+        map->grid[3][5] = '|';
+        map->grid[5][5] = '|';
+        map->grid[6][5] = '|';
+        map->grid[7][3] = '|';
+        map->grid[8][4] = '|';
+        map->grid[7][5] = '|';
+    	map->grid[5][2] = '|';
+        map->grid[3][5] = '|';
+        map->grid[3][14] = '|';
+        map->grid[3][16] = '|';
+        map->grid[4][4] = '|';
+  		map->grid[4][5] = '|';
+        map->grid[5][2] = '|';
+        map->grid[4][4] = '|';
+ 	    map->grid[4][5] = '|';
+        map->grid[5][2] = '|';
+        map->grid[3][4] = 'K';  // Chave
+        map->grid[ALTURA - 4][LARGURA - 4] = 'M';  // Meta final
+    }
+    else if (phase == 5) {
+        map->grid[2][2] = '|';
        map->grid[2][3] = '|';
        map->grid[2][4] = '|';
        map->grid[2][5] = '|';
@@ -109,19 +158,18 @@ void setupMap(Map *map, int phase) {
        map->grid[3][14] = '|';
        map->grid[3][16] = '|';
 
-       map->grid[4][2]     = '|';
-	   map->grid[4][5]     = '|';
-       map->grid[5][2]     = '|';
+       map->grid[4][2] = '|';
+	   map->grid[4][5] = '|';
+       map->grid[5][2] = '|';
 
-       map->grid[6][2]     = '|';
-
-       map->grid[7][2]     = '|';
-       map->grid[7][3]     = '|';
-       map->grid[7][4]     = '|';
-       map->grid[7][5]     = '|';
-	   map->grid[7][6]     = '|';	
-	   map->grid[7][7]     = '|';	
-	   map->grid[7][8]     = '|';
+       map->grid[6][2] = '|';
+       map->grid[7][2] = '|';
+       map->grid[7][3] = '|';
+       map->grid[7][4] = '|';
+       map->grid[7][5] = '|';
+	   map->grid[7][6] = '|';	
+	   map->grid[7][7] = '|';	
+	   map->grid[7][8] = '|';
 	   
 	   map->grid[8][2]     = '|';
 	   map->grid[8][3]     = '|';
@@ -132,11 +180,11 @@ void setupMap(Map *map, int phase) {
 
 	   map->grid[8][5] = '|';
 	   
-	   map->grid[5][9]     = '|';
-	   map->grid[7][9]     = '|';
+	   map->grid[5][9] = '|';
+	   map->grid[7][9] = '|';
 	   
-	   map->grid[10][2]     = '|';
-	   map->grid[10][9]     = '|';
+	   map->grid[10][2] = '|';
+	   map->grid[10][9] = '|';
 	   map->grid[10][12] = '|';
 	
 	   map->grid[12][5] = '|';
@@ -162,15 +210,8 @@ void setupMap(Map *map, int phase) {
        map->grid[17][17] = '|';
        map->grid[17][18] = '|';
 
-        map->grid[3][3] = 'K';  // Chave
-        map->grid[ALTURA - 2][LARGURA - 2] = 'M';  // Meta final 
-    } else if (phase == 2) {
-        map->grid[5][5] = '|';
-        map->grid[6][5] = '|';
-        map->grid[7][5] = '|';
-        map->grid[8][3] = '|';
-        map->grid[4][4] = 'K';  // Chave
-        map->grid[1][LARGURA - 2] = 'M';  // Meta final
+    map->grid[3][3] = 'K';  // Chave
+    map->grid[ALTURA - 2][LARGURA - 2] = 'M';  // Meta final 
     }
 }
 
