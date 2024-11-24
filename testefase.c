@@ -1,59 +1,64 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <locale.h>
-#include <unistd.h>  // Para usleep() -> pausar a execução por um período de tempo especificado (em microssegundos).
-#include <conio.h>   // Para _kbhit()-> para verificar se uma tecla foi pressionada  e  _getch() ->para obter uma entrada de caractere sem esperar pela tecla Enter
+#include <unistd.h>  // Para usleep()
+#include <conio.h>   // Para _kbhit() e _getch()
 
 #define LARGURA 20
 #define ALTURA 20
-#define TOTAL_DE_FASES 5 // Quantidade de fases no jogo
+#define TOTAL_DE_FASES 5
 
-// Struct para representar o jogador
 typedef struct {
-    int x, y;      // Posição do jogador
-    int hasKey;    // Se o jogador possui a chave
-    int moves;     // Contador de movimentos
+    int x, y;
+    int hasKey;
+    int moves;
 } Player;
 
-// Struct para representar o jogo
 typedef struct {
-    int FaseAtual;  // Fase atual do jogo
-    int gameOver;      // Indica se o jogo terminou
+    int FaseAtual;
+    int gameOver;
 } Game;
 
-// Struct para representar o mapa
 typedef struct {
-    char grid[ALTURA][LARGURA];  // Matriz que define o mapa
-} Map;
+    char grid[ALTURA][LARGURA];
+} Map;  // Adicionada a definição da estrutura Map
 
-// Função para desenhar o campo de jogo
+typedef struct {
+    int fasesConcluidas;
+    int totalMovimentos;
+    int chavePegada;
+} Estatisticas;
+
+Estatisticas estatisticas = {0, 0, 0};  // Inicializa as estatísticas como zeradas
+
 void drawMap(Map *map) {
-    system("cls");  // Limpa a tela no Windows
-    int i, j;  // Variáveis declaradas fora do for
+    system("cls");
+    int i, j;
     for (i = 0; i < ALTURA; i++) {
         for (j = 0; j < LARGURA; j++) {
             if (map->grid[i][j] == 'P') {
-                printf("\033[41m  \033[0m");  // Jogador como quadrado vermelho
+                printf("\033[41m  \033[0m");  // Jogador
             } else if (map->grid[i][j] == '|') {
-                printf("\033[48;5;69m  \033[0m");  // Parede como quadrado azul gelo escuro
+                printf("\033[48;5;69m  \033[0m");  // Parede
             } else if (map->grid[i][j] == 'K') {
-                printf("\033[33mK\033[0m ");  // Chave em amarelo
+                printf("\033[33mK\033[0m ");  // Chave
             } else if (map->grid[i][j] == 'M') {
-                printf("\033[42m  \033[0m");  // Meta representada como um quadrado verde
+                printf("\033[42m  \033[0m");  // Meta
             } else if (map->grid[i][j] == 'X') {
-                printf("\033[44m  \033[0m");  // Trajeto já percorrido como um quadrado azul
+                printf("\033[44m  \033[0m");  // Caminho percorrido
             } else {
-                printf("\033[48;5;153m. \033[0m");  // Fundo azul bebê
+                printf("\033[48;5;153m. \033[0m");  // Fundo
             }
         }
         printf("\n");
     }
 }
 
-// Função para exibir estatí­sticas
+// Restante do código...
 void showStats(Game *game, Player *player) {
+    printf("\n=== Estatísticas ===\n");
     printf("Fase Atual: %d/%d\n", game->FaseAtual, TOTAL_DE_FASES);
-    printf("Pontuação por movimento: %d pts\n", player->moves);
+    printf("Chave Pegada: %s\n", player->hasKey ? "Sim" : "Não");
     printf("Posição do Jogador: (%d, %d)\n", player->x, player->y);
     if (game->gameOver) {
         if (game->FaseAtual > TOTAL_DE_FASES) {
@@ -64,6 +69,7 @@ void showStats(Game *game, Player *player) {
     } else {
         printf("Estado: Jogando...\n");
     }
+    printf("=====================\n");
 }
 
 // Função para configurar o mapa da fase
@@ -212,74 +218,97 @@ void setupMap(Map *map, int phase) {
     }
 }
 
-// Função principal
-int main() {
-    setlocale(LC_ALL, "");
+void displayMenu() {
+    system("cls");
+    printf("=====================\n");
+    printf("     BEM-VINDO       \n");
+    printf("=====================\n");
+    printf("1 - Jogar\n");
+    printf("2 - Estatísticas\n");
+    printf("3 - Sair\n");
+    printf("=====================\n");
+    printf("Escolha uma opção: ");
+}
 
-    Player player = {1, 1, 0, 0};   // Inicializa o jogador
-    Game game = {1, 0};              // Inicializa o jogo
-    Map map;                         // Inicializa o mapa
+void showInstructions() {
+    system("cls");
+    printf("=====================\n");
+    printf("     INSTRUÇÕES       \n");
+    printf("=====================\n");
+    printf("- Use W, A, S, D para mover o jogador.\n");
+    printf("- Pegue a chave (K) antes de ir até a meta (M).\n");
+    printf("- Evite pisar no mesmo quadrado duas vezes.\n");
+    printf("- Complete todas as fases para vencer.\n");
+    printf("=====================\n");
+    printf("Pressione qualquer tecla para voltar ao menu...\n");
+    getch();
+}
+
+void startGame() {
+    Player player = {1, 1, 0, 0}; // Inicializa o jogador
+    Game game = {1, 0};           // Inicia na primeira fase
+    Map map;
 
     setupMap(&map, game.FaseAtual);
-    map.grid[player.y][player.x] = 'P';  // Posiciona o jogador no mapa
+    map.grid[player.y][player.x] = 'P'; // Marca o jogador no mapa
 
     drawMap(&map);
     showStats(&game, &player);
 
     while (!game.gameOver) {
         if (_kbhit()) {
-            char input = _getch();  // Captura a tecla pressionada
+            char input = _getch();
             int newX = player.x;
             int newY = player.y;
 
-            // Movimenta o jogador com base na tecla pressionada
-            if (input == 'w') newY--;  // Para cima
-            if (input == 's') newY++;  // Para baixo
-            if (input == 'a') newX--;  // Para esquerda
-            if (input == 'd') newX++;  // Para direita
+            if (input == 'w') newY--;
+            if (input == 's') newY++;
+            if (input == 'a') newX--;
+            if (input == 'd') newX++;
 
-            // Verifica se a nova posição é válida
             if (newX >= 0 && newX < LARGURA && newY >= 0 && newY < ALTURA) {
-                if (map.grid[newY][newX] != '|') {  // Não pode atravessar paredes
+                if (map.grid[newY][newX] != '|') { // Movimenta somente em locais válidos
                     if (map.grid[newY][newX] == 'X') {
                         printf("Você pisou em um quadrado azul e perdeu!\n");
                         game.gameOver = 1;
                         usleep(1000000);
                         continue;
                     }
-
                     if (map.grid[newY][newX] == 'K') {
-                        player.hasKey = 1;  // Pega a chave
+                        player.hasKey = 1;
+                        estatisticas.chavePegada = 1;
                         printf("Você pegou a chave!\n");
                         usleep(500000);
                     }
-
-                    // Verifica se o jogador alcançou a meta
                     if (map.grid[newY][newX] == 'M') {
                         if (player.hasKey) {
                             printf("Fase %d completa!\n", game.FaseAtual);
                             usleep(1000000);
+                            estatisticas.totalMovimentos += player.moves;
+                            estatisticas.fasesConcluidas++;
                             game.FaseAtual++;
                             if (game.FaseAtual > TOTAL_DE_FASES) {
-                                game.gameOver = 1;  // Jogo terminado
+                                game.gameOver = 1;
+                                printf("Você venceu todas as fases!\n");
+                                usleep(1000000);
                             } else {
                                 setupMap(&map, game.FaseAtual);
-                                player.x = player.y = 1;  // Reseta a posição
-                                player.hasKey = 0;        // Reseta a chave
-                                // **NOTA: Não resetamos a pontuação (player.moves)**
+                                player.x = player.y = 1;
+                                player.hasKey = 0;
+                                player.moves = 0;
                             }
                         } else {
-                            printf("Você precisa pegar a chave para passar de fase!\n");
+                            printf("Pegue a chave primeiro!\n");
                             usleep(500000);
-                            continue;  // Não avança para a próxima fase
+                            continue;
                         }
                     }
 
-                    map.grid[player.y][player.x] = 'X';  // Marca o caminho percorrido
+                    map.grid[player.y][player.x] = 'X'; // Marca o caminho
                     player.x = newX;
                     player.y = newY;
-                    map.grid[player.y][player.x] = 'P';
-                    player.moves++;  // Aumenta a pontuação com cada movimento
+                    map.grid[player.y][player.x] = 'P'; // Atualiza posição do jogador
+                    player.moves++;
                 }
             }
 
@@ -288,7 +317,46 @@ int main() {
         }
         usleep(100000);
     }
+}
+
+void showEstatisticas() {
+    system("cls");
+    if (estatisticas.fasesConcluidas == 0) {
+        printf("Você ainda não jogou nenhuma vez.\n");
+    } else {
+        printf("=== Estatísticas ===\n");
+        printf("Fases Concluídas: %d/%d\n", estatisticas.fasesConcluidas, TOTAL_DE_FASES);
+        printf("Total de Movimentos: %d\n", estatisticas.totalMovimentos);
+        printf("Chave Pegada: %s\n", estatisticas.chavePegada ? "Sim" : "Não");
+        printf("=====================\n");
+    }
+    printf("Pressione qualquer tecla para voltar ao menu...\n");
+    getch();
+}
+
+int main() {
+    setlocale(LC_ALL, "");
+    int option;
+
+    do {
+        displayMenu();
+        scanf("%d", &option);
+
+        switch (option) {
+            case 1:
+                startGame();
+                break;
+            case 2:
+                showEstatisticas();
+                break;
+            case 3:
+                printf("Saindo do jogo... Até a próxima!\n");
+                break;
+            default:
+                printf("Opção inválida! Tente novamente.\n");
+                usleep(1000000);
+        }
+    } while (option != 3);
 
     return 0;
 }
-
