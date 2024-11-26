@@ -10,41 +10,41 @@
 
 typedef struct {
     int x, y;
-    int hasKey;
-    int moves;
-} Player;
+    int temChave;
+    int movimentos;
+} Jogador;
 
 typedef struct {
-    int FaseAtual;
-    int gameOver;
-} Game;
+    int faseAtual;
+    int fimDeJogo;
+} Jogo;
 
 typedef struct {
-    char grid[ALTURA][LARGURA];
-} Map;  // Adicionada a definição da estrutura Map
+    char grade[ALTURA][LARGURA];
+} Mapa;
 
 typedef struct {
     int fasesConcluidas;
     int totalMovimentos;
-    int chavePegada;
+    int chaveObtida;
 } Estatisticas;
 
 Estatisticas estatisticas = {0, 0, 0};  // Inicializa as estatísticas como zeradas
 
-void drawMap(Map *map) {
+void desenharMapa(Mapa *mapa) {
     system("cls");
     int i, j;
     for (i = 0; i < ALTURA; i++) {
         for (j = 0; j < LARGURA; j++) {
-            if (map->grid[i][j] == 'P') {
+            if (mapa->grade[i][j] == 'P') {
                 printf("\033[41m  \033[0m");  // Jogador
-            } else if (map->grid[i][j] == '|') {
+            } else if (mapa->grade[i][j] == '|') {
                 printf("\033[48;5;69m  \033[0m");  // Parede
-            } else if (map->grid[i][j] == 'K') {
+            } else if (mapa->grade[i][j] == 'K') {
                 printf("\033[33mK\033[0m ");  // Chave
-            } else if (map->grid[i][j] == 'M') {
+            } else if (mapa->grade[i][j] == 'M') {
                 printf("\033[42m  \033[0m");  // Meta
-            } else if (map->grid[i][j] == 'X') {
+            } else if (mapa->grade[i][j] == 'X') {
                 printf("\033[44m  \033[0m");  // Caminho percorrido
             } else {
                 printf("\033[48;5;153m. \033[0m");  // Fundo
@@ -54,14 +54,13 @@ void drawMap(Map *map) {
     }
 }
 
-// Restante do código...
-void showStats(Game *game, Player *player) {
+void exibirEstatisticas(Jogo *jogo, Jogador *jogador) {
     printf("\n=== Estatísticas ===\n");
-    printf("Fase Atual: %d/%d\n", game->FaseAtual, TOTAL_DE_FASES);
-    printf("Chave Pegada: %s\n", player->hasKey ? "Sim" : "Não");
-    printf("Posição do Jogador: (%d, %d)\n", player->x, player->y);
-    if (game->gameOver) {
-        if (game->FaseAtual > TOTAL_DE_FASES) {
+    printf("Fase Atual: %d/%d\n", jogo->faseAtual, TOTAL_DE_FASES);
+    printf("Chave Obtida: %s\n", jogador->temChave ? "Sim" : "Não");
+    printf("Posição do Jogador: (%d, %d)\n", jogador->x, jogador->y);
+    if (jogo->fimDeJogo) {
+        if (jogo->faseAtual > TOTAL_DE_FASES) {
             printf("Estado: Jogo Concluído! Parabéns!\n");
         } else {
             printf("Estado: Você perdeu!\n");
@@ -72,153 +71,148 @@ void showStats(Game *game, Player *player) {
     printf("=====================\n");
 }
 
-// Função para configurar o mapa da fase
-void setupMap(Map *map, int phase) {
+void configurarMapa(Mapa *mapa, int fase) {
     int i, j; 
-    // Limpa o mapa
     for (i = 0; i < ALTURA; i++) {
         for (j = 0; j < LARGURA; j++) {
-            map->grid[i][j] = '.';  // Espaço vazio
+            mapa->grade[i][j] = '.';  // Espaço vazio
         }
     }
-
-    // Adiciona paredes nas bordas
     for (i = 0; i < ALTURA; i++) {
-        map->grid[i][0] = '|';
-        map->grid[i][LARGURA - 1] = '|';
+        mapa->grade[i][0] = '|';
+        mapa->grade[i][LARGURA - 1] = '|';
     }
     for (j = 0; j < LARGURA; j++) {
-        map->grid[0][j] = '|';
-        map->grid[ALTURA - 1][j] = '|';
+        mapa->grade[0][j] = '|';
+        mapa->grade[ALTURA - 1][j] = '|';
     }
-
-// Configuração específica por fase
-    if (phase == 1) {
+    // Configuração específica por fase
+    if (fase == 1) {
         //coluna x linha
-       map->grid[4][4] = 'K';  // Chave
-        map->grid[1][LARGURA - 2] = 'M';  // Meta final
-    } else if (phase == 2) {
-        map->grid[5][5] = '|';
-        map->grid[6][5] = '|';
-        map->grid[7][5] = '|';
-        map->grid[8][3] = '|';
-        map->grid[4][4] = 'K';  // Chave
-        map->grid[ALTURA - 2][LARGURA - 2] = 'M';  // Meta final 
-    }else if (phase == 3) {
-        map->grid[4][4] = '|';
-        map->grid[4][5] = '|';
-        map->grid[5][5] = '|';
-        map->grid[6][5] = '|';
-        map->grid[7][3] = '|';
-        map->grid[7][4] = '|';
-        map->grid[7][5] = '|';
-        map->grid[3][2] = '|';
-        map->grid[3][5]  = '|';
-        map->grid[3][14] = '|';
-        map->grid[3][16] = '|';
-        map->grid[4][2] = '|';
-        map->grid[4][5] = '|';
-        map->grid[5][2] = '|';
-        map->grid[8][4] = 'K';  // Chave
-        map->grid[ALTURA - 3][LARGURA - 3] = 'M';  // Meta final 
+       mapa->grade[4][4] = 'K';  // Chave
+        mapa->grade[1][LARGURA - 2] = 'M';  // Meta final
+    } else if (fase == 2) {
+        mapa->grade[5][5] = '|';
+        mapa->grade[6][5] = '|';
+        mapa->grade[7][5] = '|';
+        mapa->grade[8][3] = '|';
+        mapa->grade[4][4] = 'K';  // Chave
+        mapa->grade[ALTURA - 2][LARGURA - 2] = 'M';  // Meta final 
+    }else if (fase == 3) {
+        mapa->grade[4][4] = '|';
+        mapa->grade[4][5] = '|';
+        mapa->grade[5][5] = '|';
+        mapa->grade[6][5] = '|';
+        mapa->grade[7][3] = '|';
+        mapa->grade[7][4] = '|';
+        mapa->grade[7][5] = '|';
+        mapa->grade[3][2] = '|';
+        mapa->grade[3][5]  = '|';
+        mapa->grade[3][14] = '|';
+        mapa->grade[3][16] = '|';
+        mapa->grade[4][2] = '|';
+        mapa->grade[4][5] = '|';
+        mapa->grade[5][2] = '|';
+        mapa->grade[8][4] = 'K';  // Chave
+        mapa->grade[ALTURA - 3][LARGURA - 3] = 'M';  // Meta final 
     }
-    else if (phase == 4){
- 		map->grid[4][8] = '|';
-        map->grid[3][5] = '|';
-        map->grid[5][5] = '|';
-        map->grid[6][5] = '|';
-        map->grid[7][3] = '|';
-        map->grid[8][4] = '|';
-        map->grid[7][5] = '|';
-    	map->grid[5][2] = '|';
-        map->grid[3][5] = '|';
-        map->grid[3][14] = '|';
-        map->grid[3][16] = '|';
-        map->grid[4][4] = '|';
-  		map->grid[4][5] = '|';
-        map->grid[5][2] = '|';
-        map->grid[4][4] = '|';
- 	    map->grid[4][5] = '|';
-        map->grid[5][2] = '|';
-        map->grid[3][4] = 'K';  // Chave
-        map->grid[ALTURA - 4][LARGURA - 4] = 'M';  // Meta final
+    else if (fase == 4){
+ 		mapa->grade[4][8] = '|';
+        mapa->grade[3][5] = '|';
+        mapa->grade[5][5] = '|';
+        mapa->grade[6][5] = '|';
+        mapa->grade[7][3] = '|';
+        mapa->grade[8][4] = '|';
+        mapa->grade[7][5] = '|';
+    	mapa->grade[5][2] = '|';
+        mapa->grade[3][5] = '|';
+        mapa->grade[3][14] = '|';
+        mapa->grade[3][16] = '|';
+        mapa->grade[4][4] = '|';
+  		mapa->grade[4][5] = '|';
+        mapa->grade[5][2] = '|';
+        mapa->grade[4][4] = '|';
+ 	    mapa->grade[4][5] = '|';
+        mapa->grade[5][2] = '|';
+        mapa->grade[3][4] = 'K';  // Chave
+        mapa->grade[ALTURA - 4][LARGURA - 4] = 'M';  // Meta final
     }
-    else if (phase == 5) {
-        map->grid[2][2] = '|';
-       map->grid[2][3] = '|';
-       map->grid[2][4] = '|';
-       map->grid[2][5] = '|';
-       map->grid[2][7] = '|';
-       map->grid[2][8] = '|';
-       map->grid[2][10] = '|';
-       map->grid[2][12] = '|';
-       map->grid[2][13] = '|';
-       map->grid[2][16] = '|';
-       map->grid[2][18] = '|';
+    else if (fase == 5) {
+        mapa->grade[2][2] = '|';
+       mapa->grade[2][3] = '|';
+       mapa->grade[2][4] = '|';
+       mapa->grade[2][5] = '|';
+       mapa->grade[2][7] = '|';
+       mapa->grade[2][8] = '|';
+       mapa->grade[2][10] = '|';
+       mapa->grade[2][12] = '|';
+       mapa->grade[2][13] = '|';
+       mapa->grade[2][16] = '|';
+       mapa->grade[2][18] = '|';
 
-       map->grid[3][2]     = '|';
-       map->grid[3][5]     = '|';
-       map->grid[3][14] = '|';
-       map->grid[3][16] = '|';
+       mapa->grade[3][2]     = '|';
+       mapa->grade[3][5]     = '|';
+       mapa->grade[3][14] = '|';
+       mapa->grade[3][16] = '|';
 
-       map->grid[4][2] = '|';
-	   map->grid[4][5] = '|';
-       map->grid[5][2] = '|';
+       mapa->grade[4][2] = '|';
+	   mapa->grade[4][5] = '|';
+       mapa->grade[5][2] = '|';
 
-       map->grid[6][2] = '|';
-       map->grid[7][2] = '|';
-       map->grid[7][3] = '|';
-       map->grid[7][4] = '|';
-       map->grid[7][5] = '|';
-	   map->grid[7][6] = '|';	
-	   map->grid[7][7] = '|';	
-	   map->grid[7][8] = '|';
+       mapa->grade[6][2] = '|';
+       mapa->grade[7][2] = '|';
+       mapa->grade[7][3] = '|';
+       mapa->grade[7][4] = '|';
+       mapa->grade[7][5] = '|';
+	   mapa->grade[7][6] = '|';	
+	   mapa->grade[7][7] = '|';	
+	   mapa->grade[7][8] = '|';
 	   
-	   map->grid[8][2]     = '|';
-	   map->grid[8][3]     = '|';
-	   map->grid[8][9]     = '|';	
-	   map->grid[8][14]     = '|';
-	   map->grid[8][17]     = '|';
-	   map->grid[8][18]     = '|';
+	   mapa->grade[8][2]     = '|';
+	   mapa->grade[8][3]     = '|';
+	   mapa->grade[8][9]     = '|';	
+	   mapa->grade[8][14]     = '|';
+	   mapa->grade[8][17]     = '|';
+	   mapa->grade[8][18]     = '|';
 
-	   map->grid[8][5] = '|';
+	   mapa->grade[8][5] = '|';
 	   
-	   map->grid[5][9] = '|';
-	   map->grid[7][9] = '|';
+	   mapa->grade[5][9] = '|';
+	   mapa->grade[7][9] = '|';
 	   
-	   map->grid[10][2] = '|';
-	   map->grid[10][9] = '|';
-	   map->grid[10][12] = '|';
+	   mapa->grade[10][2] = '|';
+	   mapa->grade[10][9] = '|';
+	   mapa->grade[10][12] = '|';
 	
-	   map->grid[12][5] = '|';
-	   map->grid[14][12] = '|';
-	   map->grid[14][16] = '|';
-	   map->grid[14][5] = '|';
-	   map->grid[15][5] = '|';
+	   mapa->grade[12][5] = '|';
+	   mapa->grade[14][12] = '|';
+	   mapa->grade[14][16] = '|';
+	   mapa->grade[14][5] = '|';
+	   mapa->grade[15][5] = '|';
 	   
 	   
-	   map->grid[16][5] = '|';
-       map->grid[16][18] = '|';
-       map->grid[16][10] = '|';
-       map->grid[16][11] = '|';
-       map->grid[16][12] = '|';
-       map->grid[16][13] = '|';
-       map->grid[16][14] = '|';
-       map->grid[16][15] = '|';
+	   mapa->grade[16][5] = '|';
+       mapa->grade[16][18] = '|';
+       mapa->grade[16][10] = '|';
+       mapa->grade[16][11] = '|';
+       mapa->grade[16][12] = '|';
+       mapa->grade[16][13] = '|';
+       mapa->grade[16][14] = '|';
+       mapa->grade[16][15] = '|';
 
-       map->grid[17][5] = '|';
-       map->grid[17][9] = '|';
-       map->grid[17][12] = '|';
-       map->grid[17][16] = '|';
-       map->grid[17][17] = '|';
-       map->grid[17][18] = '|';
+       mapa->grade[17][5] = '|';
+       mapa->grade[17][9] = '|';
+       mapa->grade[17][12] = '|';
+       mapa->grade[17][16] = '|';
+       mapa->grade[17][17] = '|';
+       mapa->grade[17][18] = '|';
 
-    map->grid[3][3] = 'K';  // Chave
-    map->grid[ALTURA - 2][LARGURA - 2] = 'M';  // Meta final 
+    mapa->grade[3][3] = 'K';  // Chave
+    mapa->grade[ALTURA - 2][LARGURA - 2] = 'M';  // Meta final 
     }
 }
 
-void displayMenu() {
+void exibirMenu() {
     system("cls");
     printf("=====================\n");
     printf("     BEM-VINDO       \n");
@@ -230,7 +224,7 @@ void displayMenu() {
     printf("Escolha uma opção: ");
 }
 
-void showInstructions() {
+void exibirInstrucoes() {
     system("cls");
     printf("=====================\n");
     printf("     INSTRUÇÕES       \n");
@@ -244,58 +238,58 @@ void showInstructions() {
     getch();
 }
 
-void startGame() {
-    Player player = {1, 1, 0, 0}; // Inicializa o jogador
-    Game game = {1, 0};           // Inicia na primeira fase
-    Map map;
+void iniciarJogo() {
+    Jogador jogador = {1, 1, 0, 0}; 
+    Jogo jogo = {1, 0};           
+    Mapa mapa;
 
-    setupMap(&map, game.FaseAtual);
-    map.grid[player.y][player.x] = 'P'; // Marca o jogador no mapa
+    configurarMapa(&mapa, jogo.faseAtual);
+    mapa.grade[jogador.y][jogador.x] = 'P';
 
-    drawMap(&map);
-    showStats(&game, &player);
+    desenharMapa(&mapa);
+    exibirEstatisticas(&jogo, &jogador);
 
-    while (!game.gameOver) {
+    while (!jogo.fimDeJogo) {
         if (_kbhit()) {
             char input = _getch();
-            int newX = player.x;
-            int newY = player.y;
+            int novoX = jogador.x;
+            int novoY = jogador.y;
 
-            if (input == 'w') newY--;
-            if (input == 's') newY++;
-            if (input == 'a') newX--;
-            if (input == 'd') newX++;
+            if (input == 'w') novoY--;
+            if (input == 's') novoY++;
+            if (input == 'a') novoX--;
+            if (input == 'd') novoX++;
 
-            if (newX >= 0 && newX < LARGURA && newY >= 0 && newY < ALTURA) {
-                if (map.grid[newY][newX] != '|') { // Movimenta somente em locais válidos
-                    if (map.grid[newY][newX] == 'X') {
+            if (novoX >= 0 && novoX < LARGURA && novoY >= 0 && novoY < ALTURA) {
+                if (mapa.grade[novoY][novoX] != '|') { 
+                    if (mapa.grade[novoY][novoX] == 'X') {
                         printf("Você pisou em um quadrado azul e perdeu!\n");
-                        game.gameOver = 1;
+                        jogo.fimDeJogo = 1;
                         usleep(1000000);
                         continue;
                     }
-                    if (map.grid[newY][newX] == 'K') {
-                        player.hasKey = 1;
-                        estatisticas.chavePegada = 1;
+                    if (mapa.grade[novoY][novoX] == 'K') {
+                        jogador.temChave = 1;
+                        estatisticas.chaveObtida = 1;
                         printf("Você pegou a chave!\n");
                         usleep(500000);
                     }
-                    if (map.grid[newY][newX] == 'M') {
-                        if (player.hasKey) {
-                            printf("Fase %d completa!\n", game.FaseAtual);
+                    if (mapa.grade[novoY][novoX] == 'M') {
+                        if (jogador.temChave) {
+                            printf("Fase %d completa!\n", jogo.faseAtual);
                             usleep(1000000);
-                            estatisticas.totalMovimentos += player.moves;
+                            estatisticas.totalMovimentos += jogador.movimentos;
                             estatisticas.fasesConcluidas++;
-                            game.FaseAtual++;
-                            if (game.FaseAtual > TOTAL_DE_FASES) {
-                                game.gameOver = 1;
+                            jogo.faseAtual++;
+                            if (jogo.faseAtual > TOTAL_DE_FASES) {
+                                jogo.fimDeJogo = 1;
                                 printf("Você venceu todas as fases!\n");
                                 usleep(1000000);
                             } else {
-                                setupMap(&map, game.FaseAtual);
-                                player.x = player.y = 1;
-                                player.hasKey = 0;
-                                player.moves = 0;
+                                configurarMapa(&mapa, jogo.faseAtual);
+                                jogador.x = jogador.y = 1;
+                                jogador.temChave = 0;
+                                jogador.movimentos = 0;
                             }
                         } else {
                             printf("Pegue a chave primeiro!\n");
@@ -303,23 +297,22 @@ void startGame() {
                             continue;
                         }
                     }
-
-                    map.grid[player.y][player.x] = 'X'; // Marca o caminho
-                    player.x = newX;
-                    player.y = newY;
-                    map.grid[player.y][player.x] = 'P'; // Atualiza posição do jogador
-                    player.moves++;
+                    mapa.grade[jogador.y][jogador.x] = 'X'; 
+                    jogador.x = novoX;
+                    jogador.y = novoY;
+                    mapa.grade[jogador.y][jogador.x] = 'P'; 
+                    jogador.movimentos++;
                 }
             }
 
-            drawMap(&map);
-            showStats(&game, &player);
+            desenharMapa(&mapa);
+            exibirEstatisticas(&jogo, &jogador);
         }
         usleep(100000);
     }
 }
 
-void showEstatisticas() {
+void exibirEstatisticasGerais() {
     system("cls");
     if (estatisticas.fasesConcluidas == 0) {
         printf("Você ainda não jogou nenhuma vez.\n");
@@ -327,7 +320,7 @@ void showEstatisticas() {
         printf("=== Estatísticas ===\n");
         printf("Fases Concluídas: %d/%d\n", estatisticas.fasesConcluidas, TOTAL_DE_FASES);
         printf("Total de Movimentos: %d\n", estatisticas.totalMovimentos);
-        printf("Chave Pegada: %s\n", estatisticas.chavePegada ? "Sim" : "Não");
+        printf("Chave Obtida: %s\n", estatisticas.chaveObtida ? "Sim" : "Não");
         printf("=====================\n");
     }
     printf("Pressione qualquer tecla para voltar ao menu...\n");
@@ -335,19 +328,19 @@ void showEstatisticas() {
 }
 
 int main() {
-    setlocale(LC_ALL, "");
-    int option;
+    setlocale(LC_ALL, "Portuguese");
+    int opcao;
 
     do {
-        displayMenu();
-        scanf("%d", &option);
+        exibirMenu();
+        scanf("%d", &opcao);
 
-        switch (option) {
+        switch (opcao) {
             case 1:
-                startGame();
+                iniciarJogo();
                 break;
             case 2:
-                showEstatisticas();
+                exibirEstatisticasGerais();
                 break;
             case 3:
                 printf("Saindo do jogo... Até a próxima!\n");
@@ -356,7 +349,7 @@ int main() {
                 printf("Opção inválida! Tente novamente.\n");
                 usleep(1000000);
         }
-    } while (option != 3);
+    } while (opcao != 3);
 
     return 0;
 }
